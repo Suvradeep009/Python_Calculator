@@ -211,7 +211,7 @@ def print_matrix(M):
     for row in M:
         print(row)
 
-# Entry Point
 if __name__ == "__main__":
     main()
     
+
