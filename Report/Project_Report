@@ -1,0 +1,141 @@
+Technical Report: Python CLI Scientific Calculator
+
+Name: Suvradeep Datta
+
+Registration Number: 25BAI10328
+
+Branch: CSE(AI&ML)
+
+Date: November 24, 2025
+
+Subject: Modular Python Calculator
+
+1. Introduction
+
+This report documents the design, implementation, and analysis of a Command-Line Interface (CLI) Scientific Calculator built using Python. 
+The objective of the software is to provide a lightweight, dependency-free tool capable of handling scalar arithmetic, trigonometric evaluations in degrees, and matrix algebra.
+The system is designed to be modular, extensible, and robust against common mathematical errors.
+
+2. Approach and Design Philosophy
+
+The application utilizes a REPL (Read-Eval-Print Loop) architecture. This approach allows the program to run continuously, accepting user input, evaluating it, and printing the result until an exit command is issued.
+
+2.1 Core Design Principles
+
+Modularity: Distinct mathematical domains (Arithmetic, Trigonometry, Linear Algebra) are encapsulated in separate functions. This ensures that changes to one module (e.g., adding a new matrix operation) do not impact the stability of others.
+
+State Persistence: The calculator maintains a running state (current_result) for scalar operations, mimicking the "Ans" (Answer) button functionality found on physical scientific calculators.
+
+Standard Library Dependency: The tool relies exclusively on Python's built-in math library, ensuring high portability and removing the need for package management (e.g., pip install).
+
+3. Implementation Details
+
+3.1 Main Event Loop
+
+The main() function serves as the entry point. It initializes the session state (current_result = None) and enters an infinite while loop. It routes user input to three primary handlers:
+
+perform_arithmetic
+
+perform_trigonometry
+
+perform_matrix_operations
+
+3.2 Arithmetic Module
+
+Function: perform_arithmetic(prev_result)
+
+Logic: Standard if-elif-else structures handle operators (+, -, *, /).
+
+State Integration: If prev_result exists, the system prompts the user to reuse it. This is implemented via a helper function get_operand().
+
+Safety: Division operations are guarded by a check for num2 == 0 to prevent runtime crashes.
+
+3.3 Trigonometry Module (Sandboxed Evaluation)
+
+Function: perform_trigonometry(prev_result)
+
+This module allows users to input complex strings (e.g., sin(30) + cos(60)).
+
+Parsing Strategy: The code uses Python's eval() function. To mitigate security risks associated with eval(), the execution environment is sandboxed. 
+The __builtins__ are set to None, and a specific dictionary trig_env is provided, containing only safe mathematical functions.
+
+Degree-to-Radian Conversion: Python’s math library uses radians. Wrapper functions (e.g., safe_sin) capture the user input, convert degrees to radians ($x \cdot \frac{\pi}{180}$), and pass the result to the math library.
+
+Singularity Handling: Functions like Tangent and Secant have undefined values at specific angles (e.g., $90^{\circ}$). The implementation uses an epsilon threshold ($1e-10$). If the denominator of a function falls below this threshold, a ValueError("Undefined") is raised.
+
+3.4 Matrix Operations Module
+
+Function: perform_matrix_operations()
+
+Matrices are implemented as Lists of Lists (e.g., [[1, 2], [3, 4]]).
+
+Input Parsing: The get_matrix_input function parses space-separated strings into float arrays, row by row.
+
+Validation:
+
+Addition: Checks if Dimensions of Matrix A ($R_a \times C_a$) equal Dimensions of Matrix B ($R_b \times C_b$).
+
+Multiplication: Checks if Columns of A ($C_a$) equal Rows of B ($R_b$).
+
+Algorithms:
+
+Addition: $O(N^2)$ complexity (iterating through every element once).
+
+Multiplication: Standard algorithmic implementation with $O(N^3)$ complexity, using a triply nested loop to calculate the dot product of rows and columns.
+
+4. Results and Test Cases
+
+The following results demonstrate the system's behavior under various conditions.
+
+Test Case 1: Chained Arithmetic
+
+Input: 10 + 5
+
+Output: 15.0
+
+Next Action: User selects operation * and opts to use the previous result.
+
+Input: * 2
+
+Result: 30.0
+
+Observation: State persistence functions correctly.
+
+Test Case 2: Trigonometric Edge Cases
+
+Input: tan(45)
+
+Output: 1.0000 (Correct)
+
+Input: tan(90)
+
+Output: Result: Undefined
+
+Observation: The epsilon check successfully catches the undefined value where $\cos(90^{\circ}) \approx 0$.
+
+Test Case 3: Matrix Multiplication
+
+Matrix A (1x2): [1, 2]
+
+Matrix B (2x1): [[3], [4]]
+
+Calculation: $(1 \cdot 3) + (2 \cdot 4) = 3 + 8 = 11$
+
+Output: [[11.0]]
+
+Observation: Dimension validation passed, and the dot product was calculated correctly.
+
+5. Algorithmic Complexity
+
+Arithmetic: $O(1)$. Operations are constant time.
+
+Trigonometry: $O(L)$, where $L$ is the length of the expression string. The parsing overhead is minimal.
+
+Matrix Multiplication: $O(R_a \cdot C_b \cdot C_a)$. For square matrices of size $N$, this results in cubic complexity $O(N^3)$. 
+While acceptable for small matrices (used in this CLI context), this implementation is inefficient for large datasets compared to optimized libraries like NumPy.
+
+6. Conclusion
+
+The Python Calculator successfully meets its requirements as a multi-functional scientific tool. It correctly implements mathematical logic for scalar, trigonometric, and linear algebra operations. 
+The code is structured for readability and maintainability. 
+Future improvements could include replacing the eval() function with a Shunting-Yard algorithm parser and implementing a Class-based structure to better encapsulate the state.
